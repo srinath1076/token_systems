@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../models/Token.dart';
+import '../models/token.dart';
 
 class TokenController {
   List<Token> tokens = [];
@@ -34,7 +34,11 @@ class TokenController {
     return token;
   }
 
-  String _generateTokenNumber() {}
+  String _generateTokenNumber() {
+    //Need to actually get the total filled in the queues and issue a new token.
+    //Subject to a max if set.
+    return "1";
+  }
 
   String _generateUniqueId() {
     final uuid = Uuid();

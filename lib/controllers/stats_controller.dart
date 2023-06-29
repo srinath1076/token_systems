@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-import 'TokenController.dart';
+import 'token_controller.dart';
 
 class StatsController {
   final TokenController _tokenController;
