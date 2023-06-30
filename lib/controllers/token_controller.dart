@@ -1,63 +1,103 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:collection';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
+//import 'package:synchronized/synchronized.dart';
 
 import '../models/token.dart';
+import '../models/collector.dart';
 
 class TokenController {
-  List<Token> tokens = [];
-  List<List<Token>> queues = [];
+  final Queue<Token> tokenQueue = Queue<Token>();
+  final List<Collector> _collectors = [];
+  int _activeCollectorIndex = 0;
+  final Lock _queueLock = Lock();
+  int _totalTokensIssued = 0;
+  int _totalTokensCollected = 0;
 
-  void initializeQueues() {
-    queues.clear();
-    for (var i = 0; i < 3; i++) {
-      queues.add([]);
-    }
+  void addCollector(Collector collector) {
+    _collectors.add(collector);
   }
 
-  void resetTokens() {
-    tokens.clear();
-    initializeQueues();
-    _saveTokensToFile();
-  }
-
-  Token createToken() {
-    final token = Token(
-      id: _generateUniqueId(),
-      tokenNumber: _generateTokenNumber(),
-      validUntil: _calculateValidUntil(),
-    );
-    tokens.add(token);
-    _saveTokensToFile();
+  Token issueToken() {
+    final token = _generateToken();
+    _queueLock.synchronized(() {
+      tokenQueue.add(token);
+      _saveTokensToFile();
+      _totalTokensIssued++;
+    });
     return token;
   }
 
-  String _generateTokenNumber() {
-    //Need to actually get the total filled in the queues and issue a new token.
-    //Subject to a max if set.
-    return "1";
+// Need to persist this total tokens issued per day. Currently this can go for a toss on restart/crash!
+  int getTokensIssued() {
+    return _totalTokensIssued;
   }
 
-  String _generateUniqueId() {
-    final uuid = Uuid();
-    return uuid.v4().substring(0, 8); // Generating an 8-character token number
+  int getTokensCollected() {
+    return _totalTokensCollected;
   }
 
-  DateTime _calculateValidUntil() {
-    final now = DateTime.now();
+  Token _generateToken() {
+    final id = const Uuid().v4();
+    final number = tokenQueue.length + 1;
+    final validUntil = _calculateValidUntil(DateTime.now());
+    return Token(
+        id: id, tokenNumber: number.toString(), validUntil: validUntil);
+  }
+
+  DateTime _calculateValidUntil(DateTime dateTime) {
+    final now = dateTime;
     final midnight =
-        DateTime(now.year, now.month, now.day).add(Duration(days: 1));
-    return midnight.subtract(Duration(milliseconds: 1));
+        DateTime(now.year, now.month, now.day).add(const Duration(days: 1));
+    return midnight.subtract(const Duration(milliseconds: 1));
+  }
+
+  Token getCurrentToken() {
+    _queueLock.synchronized(() {
+      return tokenQueue.isEmpty ? Token.empty() : tokenQueue.first;
+    });
+    return Token.empty();
+  }
+
+  void markTokenAsCollected() {
+    _queueLock.synchronized(() {
+      if (tokenQueue.isNotEmpty) {
+        tokenQueue.removeFirst();
+        _saveTokensToFile();
+        _totalTokensCollected++;
+      }
+    });
+  }
+
+  void switchToNextCollector() {
+    if (_collectors.isNotEmpty) {
+      _activeCollectorIndex = (_activeCollectorIndex + 1) % _collectors.length;
+    }
+  }
+
+  Collector getActiveCollector() {
+    return _collectors[_activeCollectorIndex];
+  }
+
+  void resetTokens() {
+    _queueLock.synchronized(() {
+      tokenQueue.clear();
+      _saveTokensToFile();
+    });
   }
 
   Future<void> _saveTokensToFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/tokens.json');
-    final encodedTokens = tokens.map((token) => token.toJson()).toList();
+    final sink = file.openWrite();
+    final encodedTokens = tokenQueue.map((token) => token.toJson()).toList();
     final jsonString = jsonEncode(encodedTokens);
-    await file.writeAsString(jsonString);
+    sink.write(jsonString);
+    await sink.close();
   }
 
   // Add the following method to load tokens from file if needed
@@ -67,7 +107,8 @@ class TokenController {
     if (file.existsSync()) {
       final jsonString = await file.readAsString();
       final decodedTokens = jsonDecode(jsonString) as List<dynamic>;
-      tokens = decodedTokens.map((json) => Token.fromJson(json)).toList();
+      final token = decodedTokens.map((json) => Token.fromJson(json)).toList();
+      tokenQueue.addAll(token);
     }
   }
 }

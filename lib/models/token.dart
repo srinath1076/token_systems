@@ -21,4 +21,9 @@ class Token {
       validUntil: DateTime.parse(json['validUntil']),
     );
   }
+
+  factory Token.empty() {
+    return Token(
+        id: "NA", tokenNumber: "No one in queue!", validUntil: DateTime.now());
+  }
 }

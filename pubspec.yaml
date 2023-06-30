@@ -20,9 +20,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  path_provider: ^2.0.5
-  uuid: ^3.0.4
-  intl: ^0.17.0
+  path_provider: ^2.0.15
+  uuid: ^3.0.7
+  intl: ^0.18.1
+  #synchronized: ^3.0.0
   qr_flutter: ^4.0.0  # Replace with the latest version of qr_flutter
   
 
