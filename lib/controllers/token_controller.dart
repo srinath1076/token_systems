@@ -5,22 +5,13 @@ import 'dart:collection';
 import 'package:path_provider/path_provider.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
-//import 'package:synchronized/synchronized.dart';
 
 import '../models/token.dart';
-import '../models/collector.dart';
 
 class TokenController {
   final Queue<Token> tokenQueue = Queue<Token>();
-  final List<Collector> _collectors = [];
-  int _activeCollectorIndex = 0;
   final Lock _queueLock = Lock();
   int _totalTokensIssued = 0;
-  int _totalTokensCollected = 0;
-
-  void addCollector(Collector collector) {
-    _collectors.add(collector);
-  }
 
   Token issueToken() {
     final token = _generateToken();
@@ -35,10 +26,6 @@ class TokenController {
 // Need to persist this total tokens issued per day. Currently this can go for a toss on restart/crash!
   int getTokensIssued() {
     return _totalTokensIssued;
-  }
-
-  int getTokensCollected() {
-    return _totalTokensCollected;
   }
 
   Token _generateToken() {
@@ -63,24 +50,15 @@ class TokenController {
     return Token.empty();
   }
 
-  void markTokenAsCollected() {
+  Token consumeToken() {
     _queueLock.synchronized(() {
       if (tokenQueue.isNotEmpty) {
-        tokenQueue.removeFirst();
+        Token token = tokenQueue.removeFirst();
         _saveTokensToFile();
-        _totalTokensCollected++;
+        return token;
       }
     });
-  }
-
-  void switchToNextCollector() {
-    if (_collectors.isNotEmpty) {
-      _activeCollectorIndex = (_activeCollectorIndex + 1) % _collectors.length;
-    }
-  }
-
-  Collector getActiveCollector() {
-    return _collectors[_activeCollectorIndex];
+    return Token.empty();
   }
 
   void resetTokens() {

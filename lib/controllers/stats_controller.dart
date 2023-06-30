@@ -1,14 +1,17 @@
 //import 'dart:html';
 
 import 'package:intl/intl.dart';
+import 'package:token_system/controllers/collector_controller.dart';
 
 import 'token_controller.dart';
+//import 'collector_controller.dart';
 import '../models/token.dart';
 
 class StatsController {
   final TokenController _tokenController;
+  final CollectorController _collectorController;
 
-  StatsController(this._tokenController);
+  StatsController(this._tokenController, this._collectorController);
 
   int getTotalTokensIssued() {
     return _tokenController.getTokensIssued();
@@ -27,7 +30,7 @@ class StatsController {
   }
 
   int getTotalTokensCollected() {
-    return _tokenController.getTokensCollected();
+    return _collectorController.getTokensCollected();
   }
 
   double getAverageWaitTime() {
