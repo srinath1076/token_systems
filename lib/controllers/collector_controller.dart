@@ -17,6 +17,7 @@ class CollectorController {
 
   void setPIN(String pin) {
     _pin = CryptoRoutines.getSecureHash(pin);
+    _logger.log(Level.FINE, "Hashed pin is" + _pin);
   }
 
   String getPIN() {
@@ -47,8 +48,9 @@ class CollectorController {
         _totalTokensCollected++;
       }
     } else {
-      _logger.log(Level.INFO, 'Supplied PIN does not match the set PIN');
+      _logger.log(Level.WARNING, 'Supplied PIN does not match the set PIN');
     }
+    _logger.log(Level.INFO, "Collected Token No: ", token.tokenNumber);
     return token;
   }
 }
