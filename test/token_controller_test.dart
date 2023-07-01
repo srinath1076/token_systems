@@ -1,8 +1,19 @@
-import 'package:test/test.dart';
+import 'package:flutter/material.dart';
+//import 'package:test/test.dart';
+//
+
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:token_system/controllers/token_controller.dart';
 import 'package:token_system/models/token.dart';
 
+class MockPathProvider extends Mock implements PathProviderPlatform {}
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   group('TokenController', () {
     late TokenController tokenController;
     Token token1 = Token.empty(),
@@ -24,23 +35,23 @@ void main() {
     });
 
     test('Token Consumer checks - Issue token...', () {
-      expect(token1.tokenNumber, equals(1));
-      expect(token2.tokenNumber, equals(2));
-      expect(token3.tokenNumber, equals(3));
-      expect(tokenController.getTokensIssued(), equals(3));
+      expect(token1.tokenNumber, "1");
+      expect(token2.tokenNumber, "2");
+      expect(token3.tokenNumber, "3");
+      expect(tokenController.getTokensIssued(), 3);
       expect(token3.tokenNumber, isNot(token2.tokenNumber));
       expect(token2.id, isNot(token1.id));
-      expect(token3.validUntil, equals(token1.validUntil));
+      expect(token3.validUntil, token1.validUntil);
     });
 
-/** 
     test('Token Collector checks - verify token', () {
-      expect(tokenController, equals(3));
-      expect(tokenController.queues[0], isEmpty);
-      expect(tokenController.queues[1], isEmpty);
-      expect(tokenController.queues[2], isEmpty);
+      expect(tokenController.consumeToken().tokenNumber, token1.tokenNumber);
+      expect(tokenController.consumeToken().tokenNumber, token2.tokenNumber);
+      expect(tokenController.consumeToken().id, token3.id);
+      expect(
+          tokenController.consumeToken().validUntil, Token.empty().validUntil);
     });
-*/
+
     // Add more tests as needed
   });
 }
