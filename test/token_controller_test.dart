@@ -2,25 +2,45 @@ import 'package:flutter/material.dart';
 //import 'package:test/test.dart';
 //
 
-import 'package:flutter/services.dart';
+//import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:path_provider/path_provider.dart';
+//import 'package:mockito/mockito.dart';
+//import 'package:path_provider/path_provider.dart';
+//import 'package:path_provider_android/path_provider_android.dart';
 import 'package:token_system/controllers/token_controller.dart';
 import 'package:token_system/models/token.dart';
 
-class MockPathProvider extends Mock implements PathProviderPlatform {}
+//class MockPathProvider extends Mock implements PathProviderPlatform {}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   group('TokenController', () {
+    //MockPathProvider mockPathProvider;
+    //  TestDefaultBinaryMessenger mockBinaryMessenger;
+
     late TokenController tokenController;
     Token token1 = Token.empty(),
         token2 = Token.empty(),
         token3 = Token.empty();
 
     setUp(() {
+      /**mockPathProvider = MockPathProvider();
+      when(mockPathProvider.getApplicationDocumentsDirectory())
+          .thenAnswer((_) async => '/mocked/directory/path');
+      // Register the mock implementation
+      PathProviderPlatform.instance = mockPathProvider; 
+
+      mockBinaryMessenger = TestDefaultBinaryMessenger();
+      mockBinaryMessenger.setMockMethodCallHandler(
+        MethodChannel('plugins.flutter.io/path_provider').invokeMethod,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'getApplicationDocumentsDirectory') {
+            return '/mocked/directory/path';
+          }
+          return null;
+        },
+      ); */
       tokenController = TokenController();
       token1 = tokenController.issueToken();
       token2 = tokenController.issueToken();

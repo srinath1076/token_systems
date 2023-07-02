@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const TokenSystem());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TokenSystem extends StatelessWidget {
+  const TokenSystem({super.key});
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -16,14 +16,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.lightGreen,
       ),
       // A widget which will be started on application startup
-      home: MyHomePage(title: 'Token Management System'),
+      home: const TokenSystemHome(title: 'Token Management System'),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class TokenSystemHome extends StatelessWidget {
   final String title;
-  const MyHomePage({super.key, required this.title});
+  const TokenSystemHome({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class MyHomePage extends StatelessWidget {
         // The title text which will be shown on the action bar
         title: Text(title),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome to Token Management',
         ),
